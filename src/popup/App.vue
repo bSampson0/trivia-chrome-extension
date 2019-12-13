@@ -6,13 +6,14 @@
           <v-toolbar-title> <span class="brand"><span class="bold">Trivia</span> with Bnice</span>
           </v-toolbar-title>
         </v-app-bar>
-        <v-container class="container trivia">
+        <v-container class="container trivia text-center">
           <v-card 
-                  class="mycard p3 animated fadeIn" 
-                  max-width="600px" 
-                  depressed 
-                  color="rgba(255, 255, 255, 0.48)" 
-                  v-if="isloaded && lives > 0"
+            dark
+            class="mycard p3 animated fadeIn"               
+            max-width="600px" 
+            elevation=0 
+            color="rgba(255, 255, 255, 0)" 
+            v-if="isloaded && lives > 0"
           >
             <div class="content">
               <v-card-title>
@@ -60,30 +61,34 @@
               </v-card-text>
             </div>
           </v-card>
-            <v-card v-if="lives < 1">
+            <v-card
+              elevation="0"
+              color="rgba(0,0,0,0)"
+              width="300px"
+              v-if="lives < 1">
               <v-card-text class="finalScore">
-                <h1>Final Score: {{score}}!</h1>
-                <v-col class="mx-auto" cols="9" v-if="!submitted">
+                <h1>Final Score:<br><br><br>
+                <span class="emphasize">{{score}}</span></h1>
+                <v-col class="mx-auto" cols="9" v-if="!submitted" >
                     <v-text-field
                       v-model="initials"
-                      class="custom-field"
                       label="Enter Initials"
                       outlined
                       counter="3"
                       clearable
                       maxlength="3"
                     ></v-text-field>
-                  <v-btn @click="submitScore" class="mx-auto">Enter</v-btn>
                   </v-col>
               </v-card-text>
               <v-card-text v-if="submitted">
                 <h4>High Scores</h4>
-                <ul>
-                  <li>{{initials}} | {{score}}</li>
+                <ul v-for="highscore in highscores">
+                  <li>{{highscore.initials}} | {{highscore.score}}</li>
                 </ul>
               </v-card-text>
               <v-card-actions>
-                <v-btn @click="restartGame" class="mx-auto" v-if="submitted">
+                 <v-btn @click="submitScore" class="mx-auto">Enter</v-btn>
+                  <v-btn @click="restartGame" class="mx-auto" v-if="submitted">
                   Play Again
                 </v-btn>
               </v-card-actions>
@@ -95,7 +100,7 @@
 </template>
 
 <script>
-
+import { fireDb } from '@/plugins/firebaseConfig.js'
 
 export default {
   name: 'App',
@@ -113,9 +118,7 @@ export default {
     score: 0,
     submitted: false,
     initials: null,
-    arr: [],
-    stored: {},
-    temp: {}
+    highscores: []
   }),
   created() {
     //get data
@@ -182,37 +185,54 @@ export default {
     })
     },
     submitScore() {
-      this.stored[this.initials] = this.score
-      chrome.storage.sync.set({
-        scores:this.stored
-      }, function() {
-        console.log('score was added to storage')
-      })
-      chrome.storage.sync.get({
-        scores:[]
-      }, function(data) {
-        console.log(data.scores)
-      })
-      console.log('array values = ' + this.arr)
+      this.writeScores()
+      this.getScores()
       this.submitted = true
     },
     restartGame() {
       location.reload(true)
     },
+    async getScores() {
+      fireDb.collection('highscores').orderBy('score', 'desc').limit(5).get()
+      .then(snapshot => {
+        snapshot.forEach(doc => {
+          console.log((doc.id, '=>', doc.data().initials))
+          this.highscores.push((doc.id, '=>', doc.data()))
+        })      
+      })
+    },
+    async writeScores() {
+      const ref = fireDb.collection("highscores").add({
+        initials: this.initials,
+        score: this.score
+      })  
+    }
   }
 }
 </script>
 
 <style>
 #app {
-  background: #2C3E50;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #4CA1AF, #2C3E50);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #4CA1AF, #2C3E50); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-}
+  background: #0F2027;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #2C5364, #203A43, #0F2027);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #2C5364, #203A43, #0F2027); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  }
 
 h1, h2, h3, h4, h5, p, .brand, .btn {
   font-family: 'Montserrat', sans-serif !important;
+}
+
+.brand {
+  opacity: .8;
+}
+
+.content {
+  padding-top: 8em;
+  opacity: .8;
+}
+
+.emphasize {
+  font-size: 3em;
 }
 
 .btn {
@@ -242,6 +262,7 @@ h1, h2, h3, h4, h5, p, .brand, .btn {
 .btn-group {
   display: inline-flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .answers .btn {
@@ -259,9 +280,5 @@ h1, h2, h3, h4, h5, p, .brand, .btn {
 
 .bold {
   font-weight: 900;
-}
-
-.custom-field {
-  font-family: 'Odibee Sans', cursive;
 }
 </style>
