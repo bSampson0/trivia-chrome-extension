@@ -62,11 +62,13 @@
             </div>
           </v-card>
             <v-card
+              dark
+              class="finalScore"
               elevation="0"
               color="rgba(0,0,0,0)"
               width="300px"
               v-if="lives < 1">
-              <v-card-text class="finalScore">
+              <v-card-text>
                 <h1>Final Score:<br><br><br>
                 <span class="emphasize">{{score}}</span></h1>
                 <v-col class="mx-auto" cols="9" v-if="!submitted" >
@@ -81,16 +83,14 @@
                   </v-col>
               </v-card-text>
               <v-card-text v-if="submitted">
-                <h4>High Scores</h4>
-                <ul v-for="highscore in highscores">
-                  <li>{{highscore.initials}} | {{highscore.score}}</li>
-                </ul>
+                <h4 class="text-center">High Scores</h4>
+                <div class="score-container" v-for="highscore in highscores">
+                  <p class="high-scores">{{highscore.initials}} | {{highscore.score}}</p>
+                </div>
               </v-card-text>
               <v-card-actions>
-                <v-btn @click="submitScore" class="mx-auto">Enter</v-btn>
-                <v-btn @click="restartGame" class="mx-auto" v-if="submitted">
-                  Play Again
-                </v-btn>
+                <v-btn @click="submitScore" class="mx-auto" v-if="!submitted">Enter</v-btn>
+                <v-btn @click="restartGame" class="mx-auto" v-if="submitted">Play Again</v-btn>
               </v-card-actions>
             </v-card>
         </v-container>
@@ -219,12 +219,26 @@ export default {
 <style>
 #app {
   background: #0F2027;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #2C5364, #203A43, #0F2027);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #2C5364, #203A43, #0F2027); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: -webkit-linear-gradient(to right, #080808, #151212, #0F2027); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #080808, #151212, #0F2027); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   }
 
 h1, h2, h3, h4, h5, p, .brand, .btn {
   font-family: 'Montserrat', sans-serif !important;
+}
+
+ul {
+  list-style: none;
+}
+
+.score-container {
+  padding-top: 2em;
+}
+
+.high-scores {
+  line-height: 1em;
+  font-size: 1.2em;
+  
 }
 
 .brand {
@@ -286,6 +300,7 @@ h1, h2, h3, h4, h5, p, .brand, .btn {
 .bold {
   font-weight: 900;
 }
+
 .github-mark {
   display: flex;
   justify-content: center;
