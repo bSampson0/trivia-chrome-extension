@@ -236,7 +236,7 @@ ul {
 }
 
 .high-scores {
-  line-height: 1em;
+  line-height: .8em;
   font-size: 1.2em;
   
 }
