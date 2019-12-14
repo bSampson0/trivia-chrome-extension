@@ -5,6 +5,12 @@
         <v-app-bar color="transparent" dark elevation="0">
           <v-toolbar-title> <span class="brand"><span class="bold">Trivia</span> with Bnice</span>
           </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <div class="github-mark">
+            <a href="https://github.com/bSampson0/trivia-chrome-extension">
+              <img src="@/assets/GitHub-Mark-Light-64px.png" alt="github mark">
+            </a>
+          </div>
         </v-app-bar>
         <v-container class="container trivia text-center">
           <v-card 
@@ -94,11 +100,6 @@
               </v-card-actions>
             </v-card>
         </v-container>
-        <div class="github-mark">
-          <a href="https://github.com/bSampson0/trivia-chrome-extension">
-            <img src="@/assets/GitHub-Mark-64px.png" alt="github mark">
-          </a>
-        </div>
       </v-content>
     </v-app>
   </div>
@@ -110,6 +111,7 @@ import { fireDb } from '@/plugins/firebaseConfig.js'
 export default {
   name: 'App',
    data: () => ({
+    APIURL: "https://opentdb.com/api.php?amount=1&type=multiple",
     isloaded: false,
     test: 'test',
     question: '',
@@ -126,28 +128,10 @@ export default {
     highscores: []
   }),
   created() {
-    //get data
-    function shuffle(array) {
-      array.sort(() => Math.random() - 0.5);
-    }   
+    //get data 
     this.score = 0
     this.lives = 3
-    
-    fetch('https://opentdb.com/api.php?amount=1&type=multiple')
-    .then(resp => resp.json())
-    .then(json => {
-      //pass data to variables
-      this.question = json.results[0].question.replace(/&quot;/g,'"').replace(/&#039;|&apos;/g, "'")
-      this.difficulty = json.results[0].difficulty
-      this.correctAnswer = json.results[0].correct_answer.replace(/&quot;/g,'"').replace(/&#039;|&apos;/g, "'")
-      //populate answers array
-      this.answers.push(json.results[0].correct_answer.replace(/&quot;/g,'"').replace(/&#039;|&apos;/g, "'"))
-      json.results[0].incorrect_answers.forEach(answer => {
-        this.answers.push(answer.replace(/&quot;/g,'"').replace(/&#039;|&apos;/g, "'"))
-      })
-      shuffle(this.answers)
-      this.isloaded = true
-    })
+    this.getData()
   },
   methods: {
     testAnswer(useranswer) {
@@ -170,24 +154,7 @@ export default {
       this.iswrong = false
       this.answers.length = 0
       this.useranswer = null
-      function shuffle(array) {
-        array.sort(() => Math.random() - 0.5);
-      }
-       fetch('https://opentdb.com/api.php?amount=1&type=multiple')
-    .then(resp => resp.json())
-    .then(json => {
-      //pass data to variables
-      this.question = json.results[0].question.replace(/&quot;/g,'"').replace(/&#039;|&apos;/g, "'")
-      this.difficulty = json.results[0].difficulty
-      this.correctAnswer = json.results[0].correct_answer.replace(/&quot;/g,'"').replace(/&#039;|&apos;/g, "'")
-      //populate answers array
-      this.answers.push(json.results[0].correct_answer.replace(/&quot;/g,'"').replace(/&#039;|&apos;/g, "'"))
-      json.results[0].incorrect_answers.forEach(answer => {
-        this.answers.push(answer.replace(/&quot;/g,'"').replace(/&#039;|&apos;/g, "'"))
-      })
-      shuffle(this.answers)
-      this.isloaded = true
-    })
+      this.getData()
     },
     submitScore() {
       this.writeScores()
@@ -197,8 +164,33 @@ export default {
     restartGame() {
       location.reload(true)
     },
+    shuffle (array) {
+      array.sort(() => Math.random() - 0.5);
+    },
+    async getData() {
+      await fetch(this.APIURL)
+      .then(resp => resp.json())
+      .then(json => {
+        //pass data to variables
+        this.question = this.formatInput(json.results[0].question)
+        this.difficulty = json.results[0].difficulty
+        this.correctAnswer = this.formatInput(json.results[0].correct_answer)
+        //populate answers array
+        this.answers.push(this.correctAnswer)
+        json.results[0].incorrect_answers.forEach(answer => {
+          let temp = this.formatInput(answer)
+          this.answers.push(temp)
+        })
+        this.shuffle(this.answers)
+        this.isloaded = true
+      })
+    },
+    formatInput(data) {
+      return data.replace(/&quot;/g, '"').replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(/&#32;/g, ' ').replace(/&eacute;/g, 'é').replace(/&rsquo;/g,"'").replace(/&#039;/g,"'").replace(/&Oacute;/g, 'Ó').replace(/&oacute;/g,'ó')
+      
+    },
     async getScores() {
-      fireDb.collection('highscores').orderBy('score', 'desc').limit(5).get()
+      await fireDb.collection('highscores').orderBy('score', 'desc').limit(5).get()
       .then(snapshot => {
         snapshot.forEach(doc => {
           console.log((doc.id, '=>', doc.data().initials))
@@ -207,7 +199,7 @@ export default {
       })
     },
     async writeScores() {
-      const ref = fireDb.collection("highscores").add({
+      const ref = await fireDb.collection("highscores").add({
         initials: this.initials,
         score: this.score
       })  
@@ -308,5 +300,7 @@ ul {
 .github-mark img {
   height: 25px;
   width: 25px;
+  filter: grayscale(0%);
+  opacity: .8;
 }
 </style>
