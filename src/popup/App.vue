@@ -87,13 +87,18 @@
                 </ul>
               </v-card-text>
               <v-card-actions>
-                 <v-btn @click="submitScore" class="mx-auto">Enter</v-btn>
-                  <v-btn @click="restartGame" class="mx-auto" v-if="submitted">
+                <v-btn @click="submitScore" class="mx-auto">Enter</v-btn>
+                <v-btn @click="restartGame" class="mx-auto" v-if="submitted">
                   Play Again
                 </v-btn>
               </v-card-actions>
             </v-card>
         </v-container>
+        <div class="github-mark">
+          <a href="https://github.com/bSampson0/trivia-chrome-extension">
+            <img src="@/assets/GitHub-Mark-64px.png" alt="github mark">
+          </a>
+        </div>
       </v-content>
     </v-app>
   </div>
@@ -228,7 +233,7 @@ h1, h2, h3, h4, h5, p, .brand, .btn {
 
 .content {
   padding-top: 8em;
-  opacity: .8;
+  opacity: .7;
 }
 
 .emphasize {
@@ -280,5 +285,13 @@ h1, h2, h3, h4, h5, p, .brand, .btn {
 
 .bold {
   font-weight: 900;
+}
+.github-mark {
+  display: flex;
+  justify-content: center;
+}
+.github-mark img {
+  height: 25px;
+  width: 25px;
 }
 </style>
