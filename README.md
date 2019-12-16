@@ -2,28 +2,19 @@
 
 ## Project setup
 ```
-npm install
-```
+Download or Clone
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+run
+npm install 
+from command prompt or terminal to install dependencies
 
-### Compiles and minifies for production
-```
-npm run build
-```
+Open chrome browser - Go to Settings - Go to Extensions
 
-### Run your tests
-```
-npm run test
-```
+Click "Load unpacked"
 
-### Lints and fixes files
-```
-npm run lint
-```
+Navigate to "trivia-chrome-extension"
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+upload the "Dist" folder
+
+Open a new tab and play trivia!
+
